@@ -50,13 +50,15 @@ The file must include the following columns:
 
 ### Project Management
 
-[Project Board][https://github.com/rumenji/Vestaboard-Scheduler/projects?query=is%3Aopen]
+[Project Board][https://github.com/rumenji/Vestaboard-Scheduler/projects?query=is%3Aopen] <br />
 [List of Issues][https://github.com/rumenji/Vestaboard-Scheduler/issues]
 
 ### Author
 
 Rumen Ivanov
 [LinkedIn](https://www.linkedin.com/in/rumen-ivanov-it/)
+
+### Vestaboard
 
 Vestaboard 
 [Official website](https://www.vestaboard.com/)
