@@ -2,7 +2,7 @@
 *.pyc
 __pycache__/
 *.egg-info/
-
+app/__pycache__/
 # Virtual environment
 .venv/
 venv/
