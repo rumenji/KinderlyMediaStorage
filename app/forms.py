@@ -4,7 +4,7 @@ from wtforms import TimeField
 from wtforms.validators import InputRequired
 
 # Allowed extensions for spreadhseets
-ALLOWED_EXTENSIONS = {'xls', 'xlsx'}
+ALLOWED_EXTENSIONS = ['xls', 'xlsx']
 
 class FileUploadForm(FlaskForm):       
     file = FileField('Choose a file below and click Schedule', validators=[FileRequired(), FileAllowed(ALLOWED_EXTENSIONS, "Only .xls and .xlsx files are allowed!")])

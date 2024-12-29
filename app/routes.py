@@ -28,6 +28,7 @@ def list_jobs():
 @app.route('/upload', methods=['POST'])
 def upload_file():
     form = FileUploadForm()
+    
     if form.validate_on_submit():
         file = form.file.data
         file_path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
@@ -43,9 +44,10 @@ def upload_file():
                 flash(f'The following trips departure times have already passed: {", ".join(response)}', 'warning')
             return redirect(url_for('list_jobs'))
         except Exception as e:
+            os.remove(file_path)
             flash(str(e), 'danger')
         
-    return redirect(url_for('list_jobs'))
+    return render_template('upload.html', form=form)
 
 ##############################################################################
 # Post delete scheduled job route
