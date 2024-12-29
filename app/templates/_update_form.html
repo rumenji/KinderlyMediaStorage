@@ -1,0 +1,14 @@
+<!-- Edit form template -->
+{{ form.hidden_tag() }}
+
+{% for field in update_form if field.widget.input_type != 'hidden' %}
+  {{field.label(class="form-label")}}
+    {{ field(placeholder=field.label.text, class="form-control") }}
+    {% for error in field.errors %}
+    <span class="text-danger">{{ error }}</span>
+    {% endfor %}
+<div class="modal-footer">
+    <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>
+    <button type="submit" class="btn btn-sm btn-primary">Reschedule</button>
+</div>
+{% endfor %}

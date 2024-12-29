@@ -1,12 +1,21 @@
 FROM python:3.12-slim
 
+COPY requirements.txt /
+
+RUN pip3 install --upgrade pip
+
+RUN pip3 install -r /requirements.txt
+
+
+
+COPY . /app
+
 WORKDIR /app
 
-COPY requirements.txt requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . .
 
-EXPOSE 5000
+EXPOSE 8080
 
-CMD ["flask", "run", "--host=0.0.0.0"]
+
+
+CMD ["gunicorn","--config", "gunicorn_config.py", "app:app"]
