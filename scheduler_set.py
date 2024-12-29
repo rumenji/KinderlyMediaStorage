@@ -36,9 +36,9 @@ def read_excel(file_path):
         workbook = load_workbook(filename=file_path)
         sheet = workbook.active
         headers = [cell.value for cell in sheet[1]]
-        required_columns = ['Start time Z', 'End time Z', 'Customer', 'Orig', 'Dest']
+        required_columns = ['Start time LT', 'End time LT', 'Customer', 'Orig', 'Dest']
         if not all(col in headers for col in required_columns):
-            raise Exception('The file does not have columns Start time Z, End time Z, Customer, Orig, or Dest')
+            raise Exception('The file does not have columns Start time LT, End time LT, Customer, Orig, or Dest')
         data = []
         for row in sheet.iter_rows(min_row=2, values_only=True):
             data.append(dict(zip(headers, row)))
@@ -129,14 +129,14 @@ def schedule_trips(trips):
     skipped_trips = []
     
     for trip in trips:
-        file_departure = trip.get('Start time Z')
-        file_arrival = trip.get('End time Z')
+        file_departure = trip.get('Start time LT')
+        file_arrival = trip.get('End time LT')
         file_customer = trip.get('Customer')
         file_origin = trip.get('Orig')
         file_destination = trip.get('Dest')
         
         if not all([file_departure, file_arrival, file_customer, file_destination, file_origin]):
-            raise Exception('The file does not have columns Start time Z, End time Z, Customer, Orig, or Dest')
+            raise Exception('The file does not have columns Start time LT, End time LT, Customer, Orig, or Dest')
         # If departure - show departure time, if arrival - show arrival time
         time_to_show = file_departure if file_origin == SEARCH_VALUE else file_arrival
         try:
