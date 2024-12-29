@@ -90,7 +90,6 @@ def format_vestaboard_message(message, time, last):
                 "time": time
                 }
             )
-        # print(CURRENTLY_DISPLAYED_TRIPS)
         formatted_msg = requests.post(
             "https://vbml.vestaboard.com/compose",
             headers={"Content-Type": "application/json"},
@@ -146,12 +145,12 @@ def schedule_trips(trips):
             now = datetime.datetime.now()
             departure = datetime.datetime.combine(now.date(), departure_time)
             delay = (departure - now).total_seconds()
-            
             if delay > 0:
+                job_runtime = departure - datetime.timedelta(hours=1) if delay>3600 else now
                 job = scheduler.add_job(
                     post_to_vestaboard, 
                     'date', 
-                    run_date=departure - datetime.timedelta(hours=1),
+                    run_date=job_runtime,
                     args=[f"{customer_name} {file_origin[-3:]}-{file_destination[-3:]} {departure_time.strftime('%H%M')}", departure_time, False],
                     id=f"{file_customer}_{file_origin}_{file_destination}"
                 )
