@@ -7,6 +7,7 @@ import datetime
 import os
 from dotenv import load_dotenv
 from app import app
+from helpers import get_last_name, replace_sides
 
 load_dotenv()
 
@@ -14,6 +15,7 @@ SUBSCRIPTION_ID = os.getenv("SUBSCRIPTION_ID")
 X_VESTABOARD_API_KEY = os.getenv("X-VESTABOARD-API-KEY")
 X_VESTABOARD_API_SECRET = os.getenv("X-VESTABOARD-API-SECRET")
 DEFAULT_MESSAGE = os.getenv('DEFAULT_MESSAGE')
+DEFAULT_MESSAGE_COLOR = os.getenv('DEFAULT_MESSAGE_COLOR')
 TITLE = os.getenv('TITLE')
 SEARCH_VALUE = os.getenv('SEARCH_VALUE')
 
@@ -26,10 +28,6 @@ job_defaults = {
     'misfire_grace_time': 90
 }
 scheduler = BackgroundScheduler(jobstores={'default': job_store}, executors=executors, job_defaults=job_defaults)
-
-def allowed_file(filename):
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
 
 def read_excel(file_path):
     try:
@@ -49,13 +47,6 @@ def read_excel(file_path):
     except Exception as e:
         raise e
 
-# Limit name to 9 characters to fit on one line. If less than 9 - add spaces
-def get_last_name(full_name):
-    last_name = full_name.split()[-1]  # Get the last word (last name)
-    last_name = last_name[:9]  # Limit to 9 characters
-    last_name = last_name.ljust(9)  # Add spaces if less than 9 characters
-    return last_name
-
 CURRENTLY_DISPLAYED_TRIPS = [{
                     "msg": {
                     "style": {
@@ -71,35 +62,52 @@ def format_vestaboard_message(message, time, last):
     try:
         global CURRENTLY_DISPLAYED_TRIPS
         if last:
-            CURRENTLY_DISPLAYED_TRIPS = []  
-        if len(CURRENTLY_DISPLAYED_TRIPS) > 1:
-            now = datetime.datetime.now()
-            upcoming_trips = [trip for trip in CURRENTLY_DISPLAYED_TRIPS if trip['time'] > now.time()]
-            CURRENTLY_DISPLAYED_TRIPS = upcoming_trips
-        
-        CURRENTLY_DISPLAYED_TRIPS.append(
-                {
-                    "msg": {
-                    "style": {
-                    "height": 1,
-                    "width": 22,
-                    "align": "center"
-                    },
-                    "template": message
-                },
-                "time": time
-                }
-            )
-        formatted_msg = requests.post(
-            "https://vbml.vestaboard.com/compose",
-            headers={"Content-Type": "application/json"},
-            json={"components": [trip['msg'] for trip in CURRENTLY_DISPLAYED_TRIPS]}
-        )
-        
-        if formatted_msg.status_code == 200:
-            return formatted_msg.json()
+            CURRENTLY_DISPLAYED_TRIPS = []
+            formatted_msg = requests.post(
+                "https://vbml.vestaboard.com/compose",
+                headers={"Content-Type": "application/json"},
+                json={"components": [{
+			                    "style": {
+				                "justify": "center",
+                                "align": "center"
+                                },
+                                "template": message
+                                }]}
+                )
+            
+            if formatted_msg.status_code == 200:
+                return replace_sides(formatted_msg.json(), DEFAULT_MESSAGE_COLOR)
+            else:
+                raise Exception(f"Failed to format message: {formatted_msg.status_code}")
         else:
-            raise Exception(f"Failed to format message: {formatted_msg.status_code}")
+            if len(CURRENTLY_DISPLAYED_TRIPS) > 1:
+                now = datetime.datetime.now()
+                upcoming_trips = [trip for trip in CURRENTLY_DISPLAYED_TRIPS if trip['time'] > now.time()]
+                CURRENTLY_DISPLAYED_TRIPS = upcoming_trips
+            
+            CURRENTLY_DISPLAYED_TRIPS.append(
+                    {
+                        "msg": {
+                        "style": {
+                        "height": 1,
+                        "width": 22,
+                        "align": "center"
+                        },
+                        "template": message
+                    },
+                    "time": time
+                    }
+                )
+            formatted_msg = requests.post(
+                "https://vbml.vestaboard.com/compose",
+                headers={"Content-Type": "application/json"},
+                json={"components": [trip['msg'] for trip in CURRENTLY_DISPLAYED_TRIPS]}
+            )
+            
+            if formatted_msg.status_code == 200:
+                return formatted_msg.json()
+            else:
+                raise Exception(f"Failed to format message: {formatted_msg.status_code}")
     except Exception as e:
         raise e
     
@@ -107,6 +115,7 @@ def format_vestaboard_message(message, time, last):
 def post_to_vestaboard(message, time, last):
     try:
         characters = format_vestaboard_message(message, time, last)
+       
         if characters:
             response = requests.post(
                 f"https://subscriptions.vestaboard.com/subscriptions/{SUBSCRIPTION_ID}/message",
@@ -168,7 +177,7 @@ def schedule_trips(trips):
         scheduler.add_job(
                     post_to_vestaboard, 
                     'date', 
-                    run_date=datetime.datetime.combine(now.date(), last_departure) + datetime.timedelta(minutes=15),
+                    run_date=datetime.datetime.combine(now.date(), last_departure) + datetime.timedelta(minutes=30),
                     args=[DEFAULT_MESSAGE, last_departure, True],
                     id="End"
                 )
