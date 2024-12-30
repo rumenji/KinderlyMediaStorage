@@ -1,4 +1,4 @@
-// Listens for Edit button click to update action of the edit form in the modal and modal title
+// Listens for Edit button click to update action URL to add the trip ID of the edit form in the modal and modal title
 document.addEventListener('DOMContentLoaded', () => {  
     document.querySelectorAll('button[data-action="edit"]').forEach(button => {
         button.addEventListener('click', (event) => {

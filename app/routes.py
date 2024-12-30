@@ -29,12 +29,16 @@ def upload_file():
     form = FileUploadForm()
     
     if form.validate_on_submit():
+        # Get the uploaded file and save it to the Upload folder
         file = form.file.data
         file_path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
         file.save(file_path)  
         try:
+            # Read the saved file
             trips = read_excel(file_path)
+            # Pass the data from the file to schedule the trips
             response = schedule_trips(trips)
+            # Remove the file from the upload folder
             os.remove(file_path)
             
             flash('Successfully scheduled all upcoming trips', 'success')
@@ -43,6 +47,7 @@ def upload_file():
                 flash(f'The following trips departure times have already passed: {", ".join(response)}', 'warning')
             return redirect(url_for('list_jobs'))
         except Exception as e:
+            # If error before scheduling - remove the file
             os.remove(file_path)
             flash(str(e), 'danger')
         
@@ -69,14 +74,16 @@ def delete_job(job_id):
 def edit_job(job_id):
     update_form = EditTimeForm()
     if update_form.validate_on_submit():
+        # Get the new time from the form
         new_time = update_form.new_time.data
-        # new_time = datetime.datetime.strptime(new_time, '%H:%M').time()
         now = datetime.datetime.now()
+        # Calculate to run the job one hour prior to the trip time
         new_run_date = datetime.datetime.combine(now.date(), new_time) - datetime.timedelta(hours=1)
-        
         try:
+            # Get the job from the job store
             job = scheduler.get_job(job_id)
             if job:
+                # Reschedule with the new run time
                 job.reschedule('date', run_date=new_run_date)
             flash(f'Trip {job_id} successfully edited!', 'success')
             return redirect(url_for('list_jobs'))
