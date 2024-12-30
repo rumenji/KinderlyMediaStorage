@@ -107,16 +107,16 @@ def format_vestaboard_message(message, time, last):
 def post_to_vestaboard(message, time, last):
     try:
         characters = format_vestaboard_message(message, time, last)
-        if characters:
-            response = requests.post(
-                f"https://subscriptions.vestaboard.com/subscriptions/{SUBSCRIPTION_ID}/message",
-                headers={"Content-Type": "application/json",
-                        "x-vestaboard-api-key": X_VESTABOARD_API_KEY,
-                        "x-vestaboard-api-secret": X_VESTABOARD_API_SECRET},
-                json={"characters": characters}
-            )
-            if response.status_code != 200:
-                raise Exception(f"Failed to update Vestaboard: {response.status_code}")
+        # if characters:
+        #     response = requests.post(
+        #         f"https://subscriptions.vestaboard.com/subscriptions/{SUBSCRIPTION_ID}/message",
+        #         headers={"Content-Type": "application/json",
+        #                 "x-vestaboard-api-key": X_VESTABOARD_API_KEY,
+        #                 "x-vestaboard-api-secret": X_VESTABOARD_API_SECRET},
+        #         json={"characters": characters}
+        #     )
+        #     if response.status_code != 200:
+        #         raise Exception(f"Failed to update Vestaboard: {response.status_code}")
     except Exception as e:
         raise e
 
@@ -141,7 +141,7 @@ def schedule_trips(trips):
         time_to_show = file_departure if file_origin == SEARCH_VALUE else file_arrival
         try:
             customer_name = get_last_name(file_customer)
-            departure_time = datetime.datetime.strptime(str(time_to_show), '%H:%M').time()
+            departure_time = datetime.datetime.strptime(str(time_to_show), '%H:%M %p').time()
             now = datetime.datetime.now()
             departure = datetime.datetime.combine(now.date(), departure_time)
             delay = (departure - now).total_seconds()
