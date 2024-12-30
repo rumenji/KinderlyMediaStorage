@@ -132,6 +132,7 @@ def schedule_trips(trips):
         file_departure = trip.get('Start time LT')
         file_arrival = trip.get('End time LT')
         file_customer = trip.get('Customer')
+        file_pax = trip.get('Pax allocated')
         file_origin = trip.get('Orig')
         file_destination = trip.get('Dest')
         
@@ -139,28 +140,30 @@ def schedule_trips(trips):
             raise Exception('The file does not have columns Start time LT, End time LT, Customer, Orig, or Dest')
         # If departure - show departure time, if arrival - show arrival time
         time_to_show = file_departure if file_origin == SEARCH_VALUE else file_arrival
-        try:
-            customer_name = get_last_name(file_customer)
-            departure_time = datetime.datetime.strptime(str(time_to_show), '%H:%M %p').time()
-            now = datetime.datetime.now()
-            departure = datetime.datetime.combine(now.date(), departure_time)
-            delay = (departure - now).total_seconds()
-            if delay > 0:
-                job_runtime = departure - datetime.timedelta(hours=1) if delay>3600 else now
-                job = scheduler.add_job(
-                    post_to_vestaboard, 
-                    'date', 
-                    run_date=job_runtime,
-                    args=[f"{customer_name} {file_origin[-3:]}-{file_destination[-3:]} {departure_time.strftime('%H%M')}", departure_time, False],
-                    id=f"{file_customer}_{file_origin}_{file_destination}"
-                )
-                if last_departure < departure_time:
-                    last_departure = departure_time
+        if file_pax != 0:
+            try:
+                customer_name = get_last_name(file_customer)
+                departure_time = datetime.datetime.strptime(str(time_to_show), '%I:%M %p').time()
+                now = datetime.datetime.now()
+                departure = datetime.datetime.combine(now.date(), departure_time)
+                
+                delay = (departure - now).total_seconds()
+                if delay > 0:
+                    job_runtime = departure - datetime.timedelta(hours=1) if delay>3600 else now
+                    job = scheduler.add_job(
+                        post_to_vestaboard, 
+                        'date', 
+                        run_date=job_runtime,
+                        args=[f"{customer_name} {file_origin[-3:]}-{file_destination[-3:]} {departure_time.strftime('%H%M')}", departure_time, False],
+                        id=f"{file_customer}_{file_origin}_{file_destination}"
+                    )
+                    if last_departure < departure_time:
+                        last_departure = departure_time
 
-            else:
-                skipped_trips.append(f"{file_customer} at {departure_time}")
-        except Exception as e:
-            raise e
+                else:
+                    skipped_trips.append(f"{file_customer} at {departure_time}")
+            except Exception as e:
+                raise e
     try:  
         scheduler.add_job(
                     post_to_vestaboard, 
