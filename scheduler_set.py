@@ -107,16 +107,16 @@ def format_vestaboard_message(message, time, last):
 def post_to_vestaboard(message, time, last):
     try:
         characters = format_vestaboard_message(message, time, last)
-        # if characters:
-        #     response = requests.post(
-        #         f"https://subscriptions.vestaboard.com/subscriptions/{SUBSCRIPTION_ID}/message",
-        #         headers={"Content-Type": "application/json",
-        #                 "x-vestaboard-api-key": X_VESTABOARD_API_KEY,
-        #                 "x-vestaboard-api-secret": X_VESTABOARD_API_SECRET},
-        #         json={"characters": characters}
-        #     )
-        #     if response.status_code != 200:
-        #         raise Exception(f"Failed to update Vestaboard: {response.status_code}")
+        if characters:
+            response = requests.post(
+                f"https://subscriptions.vestaboard.com/subscriptions/{SUBSCRIPTION_ID}/message",
+                headers={"Content-Type": "application/json",
+                        "x-vestaboard-api-key": X_VESTABOARD_API_KEY,
+                        "x-vestaboard-api-secret": X_VESTABOARD_API_SECRET},
+                json={"characters": characters}
+            )
+            if response.status_code != 200:
+                raise Exception(f"Failed to update Vestaboard: {response.status_code}")
     except Exception as e:
         raise e
 
