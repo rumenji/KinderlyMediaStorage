@@ -141,7 +141,7 @@ def schedule_trips(trips):
         time_to_show = file_departure if file_origin == SEARCH_VALUE else file_arrival
         try:
             customer_name = get_last_name(file_customer)
-            departure_time = datetime.datetime.strptime(str(time_to_show), '%H:%M').time()
+            departure_time = datetime.datetime.strptime(str(time_to_show), '%H:%M %p').time()
             now = datetime.datetime.now()
             departure = datetime.datetime.combine(now.date(), departure_time)
             delay = (departure - now).total_seconds()
