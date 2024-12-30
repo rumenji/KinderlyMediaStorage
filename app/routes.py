@@ -1,9 +1,8 @@
-from flask import render_template, request, redirect, url_for, jsonify, flash, get_flashed_messages
-from werkzeug.utils import secure_filename
+from flask import render_template, request, redirect, url_for, flash, get_flashed_messages
 import os
 from app import app
 import datetime
-from scheduler_set import schedule_trips, read_excel, scheduler, allowed_file
+from scheduler_set import schedule_trips, read_excel, scheduler
 from .forms import FileUploadForm, EditTimeForm
 ##############################################################################
 # 404 route
