@@ -96,8 +96,8 @@ def format_vestaboard_message(message, time, last):
                 })
             # If it is not empty - filter the trips by time and remove the ones that have already left 15 minutes ago.
             else:
-                now = datetime.datetime.now()
-                upcoming_trips = [trip for trip in CURRENTLY_DISPLAYED_TRIPS if trip['time'] > now.time() - datetime.timedelta(minutes=15)]
+                already_left = datetime.datetime.now() - datetime.timedelta(minutes=15)
+                upcoming_trips = [trip for trip in CURRENTLY_DISPLAYED_TRIPS if trip['time'] > already_left.time()]
                 CURRENTLY_DISPLAYED_TRIPS = upcoming_trips
             # Add the current trip to list
             CURRENTLY_DISPLAYED_TRIPS.append(
