@@ -7,7 +7,7 @@ import datetime
 import os
 from dotenv import load_dotenv
 from app import app
-from helpers import get_last_name, replace_sides
+from helpers import get_last_name, replace_sides, is_24_hour_format
 
 load_dotenv()
 
@@ -176,8 +176,8 @@ def schedule_trips(trips):
             try:
                 # Get the last name of the passenger using the helper function - limit to 9 characters 
                 customer_name = get_last_name(file_customer)
-                # Convert the departure/arrival time from string in the format HH:MM AM/PM to datetime object time only.
-                departure_time = datetime.datetime.strptime(str(time_to_show), '%I:%M %p').time()
+                # Uses the helper function to convert the departure/arrival time from string in the format HH:MM AM/PM /12-hour/ or HH:MM /24-hour/ to datetime object time only.
+                departure_time = is_24_hour_format(time_to_show)
                 # Get the current time to make sure only future trips are scheduled
                 now = datetime.datetime.now()
                 # Add date to the time of the trips
